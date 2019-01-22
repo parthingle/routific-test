@@ -17,7 +17,6 @@ const options = {token: token}
 const client  = new Routific.Client(options);
 const vrp = new Routific.Vrp();
 
-var global = null;
 class App extends Component {
     constructor(props){
         super(props);
@@ -42,7 +41,6 @@ class App extends Component {
     }
     handleSubmit = (e) => {
         e.preventDefault();
-        const coords = Array(5);
         console.log(this.state)
 
         var t0 = Geocode.fromAddress(this.state.add0).then(function(response){
@@ -87,12 +85,13 @@ class App extends Component {
         var visits = []
 
         Promise.all([t0, t1, t2, t3, t4]).then(function(values) {
+            console.log(values)
             values.map((value, index) => {
                 visits.push(
                     {
                         id: index.toString(),
                         location: {
-                            name: "test_name", 
+                            name: value['lat'].toString() + value['lng'].toString(), 
                             lat: value['lat'],
                             lng: value['lng']
                         },
@@ -102,7 +101,7 @@ class App extends Component {
                     })
 
             })
-            console.log(visits)
+
             visits.map((visit) => {
                 vrp.addVisit(visit.id, visit);
               })
@@ -126,16 +125,19 @@ class App extends Component {
                 vrp.addVehicle(vehicle.id, vehicle);
               })
               vrp.addOption("traffic", "slow");
-              client.route(vrp, (err, solution, jobId) => {
+        }).then(() => {
+            client.route(vrp, (err, solution, jobId) => {
                 if (err) {
                   console.log("An error occurred");
                   console.log(err);
 
                 } else if (solution.status === "success") {
                   console.log("Solution is:")
-
-                  global = solution;
-                  console.log(global)
+                  this.setState({
+                      requestComplete: true,
+                      output: solution
+                  })
+                //   console.log(this.state.output.solution.primary_car[0].location_id)
                 }
               })
         })
@@ -143,6 +145,40 @@ class App extends Component {
     }
 
     render() {
+        var finished = this.state.requestComplete;
+        var d;
+        if(finished){
+            d = 
+            <div>
+                <h1>Route Details</h1>
+                <h4>Status: {this.state.output.status}</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Location ID</th>
+                            <th>Location Name</th>
+                            <th>Arrival Time</th>
+                            <th>Finish Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {this.state.output.solution.primary_car.map((location, index) => (
+                            <tr key={index}>
+                               <td>{location.location_id}</td>
+                               <td>{location.location_name}</td>
+                               <td>{location.arrival_time}</td>
+                               <td>{location.finish_time}</td>
+                            </tr>
+                        ) )}
+                    </tbody>
+                </table>
+                <br/>
+                <br/>
+                <br/>
+                
+
+            </div>
+        }
         return (
             <div>
                 <div>
@@ -150,7 +186,7 @@ class App extends Component {
                 </div>
                 
                 <div className="iform">
-                <div></div>
+                    {d}
                     <h2>A Simple App to Compute the Most Optimized Route using Routific</h2>
                     <h3>The first address will be considered the start and end locations</h3>
                     <form>
