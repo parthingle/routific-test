@@ -35,11 +35,12 @@ export class MapContainer extends Component {
         zoom={14}
         style={mapStyles}
         initialCenter={{
-         lat: 34.052235,
-         lng: -118.243683,
+         lat: 34.0682134,
+         lng: -118.4545966,
          zoom: 12
         }}
       >
+       
         <Marker
           onClick={this.onMarkerClick}
           name={'Kenyatta International Convention Centre'}
