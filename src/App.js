@@ -16,17 +16,23 @@ const token   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YzQ2NjQ5Y2I4Ym
 const options = {token: token}
 const client  = new Routific.Client(options);
 const vrp = new Routific.Vrp();
-var Routput = '';
 
+var global = null;
 class App extends Component {
-    state = {
-        add0: '11090 Ophir Drive, Los Angeles, CA',
-        add1: '10653 Helendale Avenue, Los Angeles, CA',
-        add2: '464 Camino De Encanto, Los Angeles, CA',
-        add3: '1145 Gayley Ave, Los Angeles, CA',
-        add4: '11400 Washington Blvd, Los Angeles, CA ',
-        
-    }
+    constructor(props){
+        super(props);
+        this.state = {
+            add0: '11090 Ophir Drive, Los Angeles, CA',
+            add1: '10653 Helendale Avenue, Los Angeles, CA',
+            add2: '464 Camino De Encanto, Los Angeles, CA',
+            add3: '1145 Gayley Ave, Los Angeles, CA',
+            add4: '11400 Washington Blvd, Los Angeles, CA ',
+
+            requestComplete: false,
+            output: null
+        }
+        this.handleSubmit = this.handleSubmit.bind(this);
+}
 
     handleChange = (e) => {
         e.preventDefault();
@@ -34,8 +40,7 @@ class App extends Component {
             [e.target.name]: e.target.value
         })
     }
-
-     handleSubmit = (e) => {
+    handleSubmit = (e) => {
         e.preventDefault();
         const coords = Array(5);
         console.log(this.state)
@@ -128,8 +133,9 @@ class App extends Component {
 
                 } else if (solution.status === "success") {
                   console.log("Solution is:")
-                  console.log(solution)
-                  
+
+                  global = solution;
+                  console.log(global)
                 }
               })
         })
@@ -144,7 +150,7 @@ class App extends Component {
                 </div>
                 
                 <div className="iform">
-                <div>{Routput}</div>
+                <div></div>
                     <h2>A Simple App to Compute the Most Optimized Route using Routific</h2>
                     <h3>The first address will be considered the start and end locations</h3>
                     <form>
