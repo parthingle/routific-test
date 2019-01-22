@@ -16,17 +16,18 @@ const token   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YzQ2NjQ5Y2I4Ym
 const options = {token: token}
 const client  = new Routific.Client(options);
 const vrp = new Routific.Vrp();
+var Routput = '';
 
 class App extends Component {
     state = {
-        add0: '',
-        add1: '',
-        add2: '',
-        add3: '',
-        add4: '',
+        add0: '11090 Ophir Drive, Los Angeles, CA',
+        add1: '10653 Helendale Avenue, Los Angeles, CA',
+        add2: '464 Camino De Encanto, Los Angeles, CA',
+        add3: '1145 Gayley Ave, Los Angeles, CA',
+        add4: '11400 Washington Blvd, Los Angeles, CA ',
         
     }
-    
+
     handleChange = (e) => {
         e.preventDefault();
         this.setState({
@@ -42,42 +43,95 @@ class App extends Component {
         var t0 = Geocode.fromAddress(this.state.add0).then(function(response){
               return response.results[0].geometry.location;
             }
-          );
+          ).catch((err) => {
+              console.log(err)
+          });
         
         var t1 = Geocode.fromAddress(this.state.add1).then(function(response){
               return response.results[0].geometry.location;
             }
-          );
-        
+          ).catch((err) => {
+              console.log(err)
+          });
+
         var t2 = Geocode.fromAddress(this.state.add2).then(function(response){
               return response.results[0].geometry.location;
             }
-          );
-        
+          ).catch((err) => {
+              console.log(err)
+          });
+
         var t3 = Geocode.fromAddress(this.state.add3).then(function(response){
               return response.results[0].geometry.location;
             }
-          );
+          ).catch((err) => {
+              console.log(err)
+          });
 
         var t4 = Geocode.fromAddress(this.state.add4).then(function(response){
               return response.results[0].geometry.location;
             }
-          );
+          ).catch((err) => {
+              console.log(err)
+          });
+        
 
         
 
-        var comb = {'t0':{}, 't1':{}, 't2':{}, 't3':{}, 't4':{}}
-        var vists = []
+
+        var visits = []
 
         Promise.all([t0, t1, t2, t3, t4]).then(function(values) {
-            console.log(values)
-            console.log(typeof values)
-            
-            comb['t0'] = values[0];
-            comb['t1'] = values[1];
-            comb['t2'] = values[2];
-            comb['t3'] = values[3];
-            comb['t4'] = values[4];
+            values.map((value, index) => {
+                visits.push(
+                    {
+                        id: index.toString(),
+                        location: {
+                            name: "test_name", 
+                            lat: value['lat'],
+                            lng: value['lng']
+                        },
+                        start: "1:00",
+                        end: "23:00",
+                        duration: 10
+                    })
+
+            })
+            console.log(visits)
+            visits.map((visit) => {
+                vrp.addVisit(visit.id, visit);
+              })
+
+            const vehicles = [
+                {
+                    id: "primary_car",
+                    start_location: {
+                        id: "home",
+                        lat: values[0]['lat'],
+                        lng: values[0]['lng']
+                    },
+                    end_location: {
+                        id: "home",
+                        lat: values[0]['lat'],
+                        lng: values[0]['lng']
+                    }
+                }
+            ]
+            vehicles.map((vehicle) => {
+                vrp.addVehicle(vehicle.id, vehicle);
+              })
+              vrp.addOption("traffic", "slow");
+              client.route(vrp, (err, solution, jobId) => {
+                if (err) {
+                  console.log("An error occurred");
+                  console.log(err);
+
+                } else if (solution.status === "success") {
+                  console.log("Solution is:")
+                  console.log(solution)
+                  
+                }
+              })
         })
             
     }
@@ -90,6 +144,7 @@ class App extends Component {
                 </div>
                 
                 <div className="iform">
+                <div>{Routput}</div>
                     <h2>A Simple App to Compute the Most Optimized Route using Routific</h2>
                     <h3>The first address will be considered the start and end locations</h3>
                     <form>
